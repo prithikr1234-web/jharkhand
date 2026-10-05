@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "StaffUser": {
+      "title": "StaffUser",
+      "description": "Internal newsroom staff account profile linked to Firebase Auth UID",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["ADMIN", "EDITOR", "REPORTER", "MEDIA", "AD_MANAGER"] },
+        "active": { "type": "boolean" },
+        "department": { "type": "string" },
+        "district": { "type": "string" },
+        "permissions": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "lastLoginAt": { "type": "string" },
+        "mustChangePassword": { "type": "boolean" },
+        "phone": { "type": "string" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["uid", "email", "role", "active"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "News article document managed through editorial lifecycle and read by public",
+      "type": "object",
+      "properties": {
+        "titleHi": { "type": "string" },
+        "slug": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "summaryHi": { "type": "string" },
+        "contentHi": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CHANGES_REQUESTED",
+            "APPROVED",
+            "SCHEDULED",
+            "PUBLISHED",
+            "UNPUBLISHED",
+            "ARCHIVED",
+            "REJECTED"
+          ]
+        },
+        "categoryId": { "type": "string" },
+        "districtId": { "type": "string" },
+        "districtName": { "type": "string" },
+        "tags": { "type": "array" },
+        "featuredImage": { "type": "string" },
+        "coverImageCaption": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "isBreaking": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "views": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "approvedAt": { "type": "string" },
+        "publishedAt": { "type": "string" },
+        "scheduledAt": { "type": "string" },
+        "reviewComment": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "publishedBy": { "type": "string" }
+      },
+      "required": ["titleHi", "slug", "status", "authorId"]
+    },
+    "MediaItem": {
+      "title": "MediaItem",
+      "description": "Asset metadata uploaded to Firebase Storage",
+      "type": "object",
+      "properties": {
+        "storagePath": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["image", "video", "document"] },
+        "size": { "type": "number" },
+        "mimeType": { "type": "string" },
+        "uploadedBy": { "type": "string" },
+        "uploadedByName": { "type": "string" },
+        "uploadedAt": { "type": "string" },
+        "caption": { "type": "string" },
+        "credit": { "type": "string" }
+      },
+      "required": ["downloadUrl", "type", "uploadedBy"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Append-only chronological record of newsroom staff actions",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "actorUid": { "type": "string" },
+        "actorName": { "type": "string" },
+        "actorRole": { "type": "string" },
+        "targetType": { "type": "string" },
+        "targetId": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "metadata": { "type": "object" }
+      },
+      "required": ["action", "actorUid", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/staffUsers/{uid}": {
+      "schema": "StaffUser",
+      "description": "Staff profiles and role assignments"
+    },
+    "/articles/{articleId}": {
+      "schema": "Article",
+      "description": "News articles collection"
+    },
+    "/media/{mediaId}": {
+      "schema": "MediaItem",
+      "description": "Media library assets"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "System audit logs"
+    }
+  }
+}

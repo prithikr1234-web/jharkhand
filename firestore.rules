@@ -1,0 +1,168 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function getStaffDoc() {
+      return get(/databases/$(database)/documents/staffUsers/$(request.auth.uid));
+    }
+
+    function isActiveStaff() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/staffUsers/$(request.auth.uid)) &&
+             getStaffDoc().data.active == true;
+    }
+
+    function getStaffRole() {
+      return getStaffDoc().data.role;
+    }
+
+    function isAdmin() {
+      return isActiveStaff() && getStaffRole() == 'ADMIN';
+    }
+
+    function isEditor() {
+      return isActiveStaff() && (getStaffRole() == 'EDITOR' || getStaffRole() == 'ADMIN');
+    }
+
+    function isReporter() {
+      return isActiveStaff() && (getStaffRole() == 'REPORTER' || getStaffRole() == 'EDITOR' || getStaffRole() == 'ADMIN');
+    }
+
+    function isMedia() {
+      return isActiveStaff() && (getStaffRole() == 'MEDIA' || getStaffRole() == 'ADMIN');
+    }
+
+    function isAdManager() {
+      return isActiveStaff() && (getStaffRole() == 'AD_MANAGER' || getStaffRole() == 'ADMIN');
+    }
+
+    // --- Staff Users Collection ---
+    match /staffUsers/{uid} {
+      // Staff members can read staff directory; individual can read own profile
+      allow read: if isActiveStaff() || isUser(uid);
+
+      // Only Administrator can create or delete staff accounts
+      allow create: if isAdmin() || (isAuthenticated() && !exists(/databases/$(database)/documents/staffUsers/{uid}) && request.resource.data.role == 'ADMIN');
+      allow delete: if isAdmin() && !isUser(uid);
+
+      // Update rules: Admins can update any staff user.
+      // A user can update their own non-privileged fields (name, phone, mustChangePassword, lastLoginAt).
+      allow update: if isAdmin() || (
+        isUser(uid) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.active == resource.data.active &&
+        request.resource.data.uid == resource.data.uid
+      );
+    }
+
+    // --- Articles Collection ---
+    match /articles/{articleId} {
+      // Public can only read published articles. Staff can read all statuses.
+      allow read: if (resource.data.status == 'PUBLISHED' || resource.data.status == 'published') || isActiveStaff();
+
+      // Reporters, Editors, Admins can create articles as drafts or submitted
+      allow create: if isReporter() &&
+        request.resource.data.authorId == request.auth.uid &&
+        (isEditor() || (request.resource.data.status == 'DRAFT' || request.resource.data.status == 'SUBMITTED'));
+
+      // Updates:
+      // - Admins and Editors can update any article and transition any status.
+      // - Reporters can only update their own articles if NOT published/approved, and CANNOT set status to PUBLISHED or APPROVED.
+      allow update: if isEditor() || (
+        isReporter() &&
+        resource.data.authorId == request.auth.uid &&
+        resource.data.status != 'PUBLISHED' &&
+        request.resource.data.status != 'PUBLISHED' &&
+        request.resource.data.status != 'APPROVED' &&
+        request.resource.data.authorId == resource.data.authorId
+      );
+
+      // Delete: Only Admin or Editor
+      allow delete: if isEditor() || (
+        isReporter() &&
+        resource.data.authorId == request.auth.uid &&
+        resource.data.status == 'DRAFT'
+      );
+    }
+
+    // --- Media Library Collection ---
+    match /media/{mediaId} {
+      allow read: if true;
+      allow create: if isMedia() || isReporter() || isEditor();
+      allow update: if isMedia() || isEditor();
+      allow delete: if isEditor();
+    }
+
+    // --- EPapers Collection ---
+    match /epapers/{epaperId} {
+      allow read: if true;
+      allow write: if isMedia() || isEditor();
+    }
+
+    // --- Advertisements Collection ---
+    match /advertisements/{adId} {
+      allow read: if true;
+      allow write: if isAdManager() || isEditor();
+    }
+
+    // --- Comments Collection ---
+    match /comments/{commentId} {
+      // Public can read approved comments; Editors can read all
+      allow read: if resource.data.status == 'approved' || isEditor();
+      // Anyone can submit a comment, but it must be pending
+      allow create: if request.resource.data.status == 'pending';
+      // Only Editor can moderate comments
+      allow update, delete: if isEditor();
+    }
+
+    // --- Categories & Districts ---
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /districts/{districtId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Citizen Reports Collection ---
+    match /citizenReports/{reportId} {
+      allow create: if true;
+      allow read, update, delete: if isEditor();
+    }
+
+    // --- Polls Collection ---
+    match /polls/{pollId} {
+      allow read: if true;
+      // Allow incrementing vote count
+      allow update: if isEditor() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options', 'totalVotes']);
+      allow create, delete: if isEditor();
+    }
+
+    // --- Site Settings ---
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Audit Logs (Append-Only) ---
+    match /auditLogs/{logId} {
+      // Only editors and admins can read audit logs
+      allow read: if isEditor();
+      // Active staff can append logs
+      allow create: if isActiveStaff() && request.resource.data.actorUid == request.auth.uid;
+      // Immutability: logs cannot be altered or deleted
+      allow update, delete: if false;
+    }
+  }
+}

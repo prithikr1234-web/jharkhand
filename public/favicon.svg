@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#B3121A"/>
+  <circle cx="32" cy="18" r="8" fill="#F28C28"/>
+  <path d="M32 20 L24 44 H40 Z" fill="#FFFFFF"/>
+  <path d="M32 32 L32 46" stroke="#B3121A" stroke-width="2"/>
+  <text x="32" y="58" font-family="'Noto Serif Devanagari', serif" font-weight="900" font-size="14" fill="#FFFFFF" text-anchor="middle">झ</text>
+</svg>

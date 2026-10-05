@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <rect width="192" height="192" rx="36" fill="#B3121A"/>
+  <circle cx="96" cy="56" r="24" fill="#F28C28"/>
+  <path d="M96 64 L72 136 H120 Z" fill="#FFFFFF"/>
+  <path d="M96 100 L96 142" stroke="#B3121A" stroke-width="6"/>
+  <text x="96" y="174" font-family="'Noto Serif Devanagari', serif" font-weight="900" font-size="32" fill="#FFFFFF" text-anchor="middle">झारखंड स्वतंत्र खबर</text>
+</svg>

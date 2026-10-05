@@ -1,0 +1,6 @@
+{
+  "name": "झारखंड स्वतंत्र खबर (Jharkhand Swatantra Khabar)",
+  "description": "सच के साथ, आपके साथ - झारखंड और बिहार का प्रमुख निष्पक्ष एवं विश्वसनीय हिंदी डिजिटल समाचार पत्र।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "झारखंड स्वतंत्र खबर",
+  "short_name": "JSK न्यूज़",
+  "description": "सच के साथ, आपके साथ - झारखंड और बिहार का प्रमुख निष्पक्ष एवं विश्वसनीय हिंदी डिजिटल समाचार पत्र।",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF8F3",
+  "theme_color": "#B3121A",
+  "lang": "hi",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
